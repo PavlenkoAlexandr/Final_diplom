@@ -3,8 +3,8 @@ from django.contrib import admin
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from users.models import User, Contact, ConfirmEmailToken
-
+from users.models import User, Contact
+from authorization.models import ConfirmEmailToken
 
 @admin.register(User)
 class CustomUserAdmin(UserAdmin):

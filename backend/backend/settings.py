@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'orders',
     'products',
     'backend',
+    'authorization',
+    'partner',
     'rest_framework',
     'rest_framework.authtoken',
     'django_rest_passwordreset',

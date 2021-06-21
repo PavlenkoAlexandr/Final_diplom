@@ -19,7 +19,10 @@ from orders import urls as orders_urls
 from products import urls as products_urls
 from shops import urls as shops_urls
 from users import urls as users_urls
+from authorization import urls as auth_url
+from partner import urls as partner_url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-] + orders_urls.urlpatterns + products_urls.urlpatterns + shops_urls.urlpatterns + users_urls.urlpatterns
+] + orders_urls.urlpatterns + products_urls.urlpatterns + shops_urls.urlpatterns + users_urls.urlpatterns + \
+              auth_url.urlpatterns + partner_url.urlpatterns
