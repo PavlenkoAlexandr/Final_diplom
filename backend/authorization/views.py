@@ -1,9 +1,10 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from authorization.models import ConfirmEmailToken
+from users.models import User
 from users.serializers import UserSerializer
 from backend.signals import new_user_registered
 
@@ -39,7 +40,7 @@ class RegisterAccount(APIView):
                     user = user_serializer.save()
                     user.set_password(request.data['password'])
                     user.save()
-                    new_user_registered.send(sender=self.__class__, user_id=user.id)
+                    # new_user_registered.send(sender=self.__class__, user_id=user.id)
                     return JsonResponse({'Status': True})
                 else:
                     return JsonResponse({'Status': False, 'Errors': user_serializer.errors})
@@ -89,3 +90,15 @@ class LoginAccount(APIView):
             return JsonResponse({'Status': False, 'Errors': 'Не удалось авторизовать'})
 
         return JsonResponse({'Status': False, 'Errors': 'Не указаны все необходимые аргументы'})
+
+
+def verify(request, uuid):
+    try:
+        user = User.objects.get(verification_uuid=uuid, is_verified=False)
+    except User.DoesNotExist:
+        raise Http404("User does not exist or is already verified")
+
+    user.is_verified = True
+    user.save()
+
+    return JsonResponse({'Status': True})

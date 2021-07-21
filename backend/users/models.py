@@ -2,8 +2,12 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+import uuid
 
+
+from backend import settings
 
 USER_TYPE_CHOICES = (
     ('shop', 'Магазин'),
@@ -57,6 +61,8 @@ class User(AbstractUser):
     email = models.EmailField(_('email address'), unique=True)
     company = models.CharField(verbose_name='Компания', max_length=40, blank=True)
     position = models.CharField(verbose_name='Должность', max_length=40, blank=True)
+    is_verified = models.BooleanField('verified', default=False)  # Add the `is_verified` flag
+    verification_uuid = models.UUIDField('Unique Verification UUID', default=uuid.uuid4)
     username_validator = UnicodeUsernameValidator()
     username = models.CharField(
         _('username'),
@@ -105,3 +111,14 @@ class Contact(models.Model):
 
     def __str__(self):
         return f'{self.city} {self.street} {self.house}'
+
+
+from django.db.models import signals
+from django.core.mail import send_mail, EmailMultiAlternatives
+from backend.tasks import send_verification_email
+
+def user_post_save(sender, instance, signal, *args, **kwargs):
+    if not instance.is_verified:
+        send_verification_email.delay(instance.pk)
+
+signals.post_save.connect(user_post_save, sender=User)
